@@ -80,19 +80,62 @@ static VOID DokanDbgPrint(LPCSTR format, ...) {
     fflush(stderr);
 }
 
+// Dokan1.DLL would often get used from multithreaded applications, like
+// Windows Explorer querying "network drives", and then a debug log having
+// all threads' lines interspersed and only marked with ProcessId makes it
+// hardly usable, like in https://github.com/dokan-dev/dokany/issues/945
+// We have to add thread's mark for filtering/sorting of the log.
+static thread_local DWORD _known_thread_id = 0;
+static const WCHAR *_thread_tag_template = L" <th:4294967295> "; // length == 17+1
+static thread_local WCHAR _thread_tag[20] = L"";
+static thread_local int _thread_tag_len = 0;
+
 static VOID DokanDbgPrintW(LPCWSTR format, ...) {
   const WCHAR *outputString = format; // fallback
   WCHAR *buffer = NULL;
+  WCHAR *msg = NULL;
   int length;
   va_list argp;
+  DWORD tid;
 
   va_start(argp, format);
+  
+  tid = GetCurrentThreadId();
+  if ((tid != _known_thread_id) || (!_thread_tag[0])) {
+    if ( !_thread_tag[0] ) {
+       int err = wcscpy_s( _thread_tag, 20, _thread_tag_template ); 
+       assert( 0 == err ); 
+    }
+    if ( !_ultow_s( tid, &_thread_tag[5], 20 - 5 - 2, 10) ) {
+      int err = wcscat_s( _thread_tag, 20, _thread_tag_template[15] /* L"> " */ );
+      if ( err ) {
+        _thread_tag[0] = 0;
+        _thread_tag_len = 0;
+      } else {   
+        _thread_tag_len = wcslen( _thread_tag );
+        _known_thread_id = tid;
+      }  
+    }    
+  }
+  
   length = _vscwprintf(format, argp) + 1;
   if ((length - 1) != -1) {
+    if (_thread_tag[0])
+      length += _thread_tag_len;
     buffer = (WCHAR *)_malloca(length * sizeof(WCHAR));
   }
-  if (buffer && vswprintf_s(buffer, length, format, argp) != -1) {
-    outputString = buffer;
+  
+  if (buffer) {
+    msg = buffer;  
+    if (_thread_tag[0]) {
+      if (!wcscpy_s(buffer, length, _thread_tag)) {
+          msg += _thread_tag_len;
+          length -= _thread_tag_len;
+      }
+    }
+    if (vswprintf_s(msg, length, format, argp) != -1) {
+      outputString = buffer;
+    }
   }
   if (g_UseStdErr)
     fputws(outputString, stderr);
