@@ -112,7 +112,7 @@ static VOID DokanDbgPrintW(LPCWSTR format, ...) {
        assert( 0 == err ); 
     }
     if ( !_ultow_s( tid, &_thread_tag[5], 20 - 5 - 2, 10) ) {
-      int err = wcscat_s( _thread_tag, 20, _thread_tag_template[15] /* L"> " */ );
+      int err = wcscat_s( _thread_tag, 20, &_thread_tag_template[15] /* L"> " */ );
       if ( err ) {
         _thread_tag[0] = 0;
         _thread_tag_len = 0;
