@@ -137,11 +137,11 @@ DokanDispatchWrite(__in PREQUEST_CONTEXT RequestContext) {
 
     LARGE_INTEGER safeEventLength;
     safeEventLength.QuadPart =
-        sizeof(EVENT_CONTEXT) + RequestContext->IrpSp->Parameters.Write.Length +
+        (ptrdiff_t) sizeof(EVENT_CONTEXT) + RequestContext->IrpSp->Parameters.Write.Length +
                   fcb->FileName.Length;
     if (safeEventLength.HighPart != 0 ||
         safeEventLength.QuadPart <
-            sizeof(EVENT_CONTEXT) + fcb->FileName.Length) {
+            (ptrdiff_t) sizeof(EVENT_CONTEXT) + fcb->FileName.Length) {
       DokanLogError(&logger,
                     STATUS_INVALID_PARAMETER,
                     L"Write with unsupported total size: %I64u",
