@@ -85,6 +85,9 @@ static VOID DokanDbgPrint(LPCSTR format, ...) {
 // all threads' lines interspersed and only marked with ProcessId makes it
 // hardly usable, like in https://github.com/dokan-dev/dokany/issues/945
 // We have to add thread's mark for filtering/sorting of the log.
+#if defined(_MSC_VER) && !defined(thread_local)
+  #define thread_local __declspec(thread)
+#endif
 static thread_local DWORD _known_thread_id = 0;
 static const WCHAR *_thread_tag_template = L" <th:4294967295> "; // length == 17+1
 static thread_local WCHAR _thread_tag[20] = L"";
