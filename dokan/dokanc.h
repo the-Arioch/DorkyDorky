@@ -93,6 +93,8 @@ static const WCHAR *_thread_tag_template = L" <th:4294967295> "; // length == 17
 static thread_local WCHAR _thread_tag[20] = L"";
 static thread_local int _thread_tag_len = 0;
 
+#include <assert.h>
+
 static VOID DokanDbgPrintW(LPCWSTR format, ...) {
   const WCHAR *outputString = format; // fallback
   WCHAR *buffer = NULL;
