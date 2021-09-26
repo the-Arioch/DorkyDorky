@@ -29,7 +29,7 @@ const UNICODE_STRING g_NotificationFileName =
 
 // We must NOT call without VCB lock
 PDokanFCB DokanAllocateFCB(__in PDokanVCB Vcb, __in PWCHAR FileName,
-                           __in ULONG FileNameLength) {
+                           __in USHORT FileNameLength) {
   PDokanFCB fcb = ExAllocateFromLookasideListEx(&g_DokanFCBLookasideList);
 
   // Try again if garbage collection frees up space. This is a no-op when
@@ -93,7 +93,7 @@ PDokanFCB DokanAllocateFCB(__in PDokanVCB Vcb, __in PWCHAR FileName,
 }
 
 PDokanFCB DokanGetFCB(__in PREQUEST_CONTEXT RequestContext, __in PWCHAR FileName,
-                      __in ULONG FileNameLength, BOOLEAN CaseSensitive) {
+                      __in USHORT FileNameLength, BOOLEAN CaseSensitive) {
   PLIST_ENTRY thisEntry, nextEntry, listHead;
   PDokanFCB fcb = NULL;
   UNICODE_STRING fn = DokanWrapUnicodeString(FileName, FileNameLength);

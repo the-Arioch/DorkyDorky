@@ -23,6 +23,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "dokan.h"
 #include "util/fcb.h"
 #include "util/str.h"
+#include <climits>
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(PAGE, DokanDispatchCreate)
@@ -133,10 +134,15 @@ DokanFreeCCB(__in PREQUEST_CONTEXT RequestContext, __in PDokanCCB ccb) {
 // otherwise returns STATUS_SUCCESS
 
 NTSTATUS DokanGetParentDir(__in const WCHAR *fileName, __out WCHAR **parentDir,
-                           __out ULONG *parentDirLength) {
+                           __out USHORT *parentDirLength) {
   // first check if there is a parent
 
   LONG len = (LONG)wcslen(fileName);
+  
+  // parentDirLength used to be ULONG causing compilation warnings in fcb.c DokanGetFCB
+  // NT Kernel's UNICODE_STRING would not allow names larger than USHORT bytes anyway
+  if ( len > USHRT_MAX / sizeof(WCHAR) - 1 )
+    return STATUS_INVALID_PARAMETER;
 
   LONG i;
 
@@ -369,14 +375,14 @@ Return Value:
   PFILE_OBJECT fileObject = NULL;
   PEVENT_CONTEXT eventContext = NULL;
   PFILE_OBJECT relatedFileObject;
-  ULONG fileNameLength = 0;
+  USHORT fileNameLength = 0;
   ULONG eventLength;
   PDokanFCB fcb = NULL;
   PDokanFCB relatedFcb = NULL;
   PDokanCCB ccb = NULL;
   PWCHAR fileName = NULL;
   PWCHAR parentDir = NULL; // for SL_OPEN_TARGET_DIRECTORY
-  ULONG parentDirLength = 0;
+  USHORT parentDirLength = 0;
   BOOLEAN needBackSlashAfterRelatedFile = FALSE;
   BOOLEAN alternateDataStreamOfRootDir = FALSE;
   ULONG securityDescriptorSize = 0;

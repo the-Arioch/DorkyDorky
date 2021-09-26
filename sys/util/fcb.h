@@ -29,7 +29,7 @@ extern const UNICODE_STRING g_NotificationFileName;
 
 // Create a new instance of DokanFCB and insert in VolumeControlBlock Fcb list.
 PDokanFCB DokanAllocateFCB(__in PDokanVCB Vcb, __in PWCHAR FileName,
-                           __in ULONG FileNameLength);
+                           __in USHORT FileNameLength);
 
 // Decrements the FileCount on the given Fcb, which either deletes it or
 // schedules it for garbage collection if the FileCount becomes 0.
@@ -39,7 +39,7 @@ DokanFreeFCB(__in PDokanVCB Vcb, __in PDokanFCB Fcb);
 // Return the FCB instance attached to the FileName if already present in the
 // VolumeControlBlock Fcb list.
 PDokanFCB DokanGetFCB(__in PREQUEST_CONTEXT RequestContext,
-                      __in PWCHAR FileName, __in ULONG FileNameLength,
+                      __in PWCHAR FileName, __in USHORT FileNameLength,
                       BOOLEAN CaseSensitive);
 
 // Starts the FCB garbage collector thread for the given volume. If the
