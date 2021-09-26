@@ -91,7 +91,7 @@ static VOID DokanDbgPrint(LPCSTR format, ...) {
 static thread_local DWORD _known_thread_id = 0;
 static const WCHAR *_thread_tag_template = L" <th:4294967295> "; // length == 17+1
 static thread_local WCHAR _thread_tag[20] = L"";
-static thread_local int _thread_tag_len = 0;
+static thread_local size_t _thread_tag_len = 0;
 
 #include <assert.h>
 
@@ -99,7 +99,7 @@ static VOID DokanDbgPrintW(LPCWSTR format, ...) {
   const WCHAR *outputString = format; // fallback
   WCHAR *buffer = NULL;
   WCHAR *msg = NULL;
-  int length;
+  size_t length;
   va_list argp;
   DWORD tid;
 
